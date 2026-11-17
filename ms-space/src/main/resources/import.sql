@@ -1,0 +1,5 @@
+INSERT INTO tb_spaces (owner_name, title, type, area_square_meters, residence_count, city, state, status, created_at) VALUES ('Condomínio Cidade Verde', 'Cobertura disponível para horta urbana', 'ROOFTOP', 240.50, 60, 'São Paulo', 'SP', 'AVAILABLE', CURRENT_TIMESTAMP);
+
+INSERT INTO tb_spaces (owner_name, title, type, area_square_meters, residence_count, city, state, status, created_at) VALUES ('Associação Comunitária Vila Nova', 'Terreno para cultivo comunitário', 'LAND', 500.00, 40, 'São Paulo', 'SP', 'AVAILABLE', CURRENT_TIMESTAMP);
+
+INSERT INTO tb_spaces (owner_name, title, type, area_square_meters, residence_count, city, state, status, created_at) VALUES ('Edifício Horizonte', 'Terraço para implantação de horta', 'TERRACE', 180.75, 32, 'Campinas', 'SP', 'UNDER_EVALUATION', CURRENT_TIMESTAMP);
