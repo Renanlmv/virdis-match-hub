@@ -1,0 +1,5 @@
+INSERT INTO tb_cultivation_projects (space_id, producer_name, producer_email, cultivation_type, proposal_description, estimated_capacity, offered_monthly_rent, status, created_at) VALUES (1, 'Lucas Almeida', 'lucas.almeida@email.com', 'VEGETABLES', 'Implantação de horta com hortaliças orgânicas e sistema de irrigação por gotejamento.', 350, 1800.00, 'CREATED', CURRENT_TIMESTAMP);
+
+INSERT INTO tb_cultivation_projects (space_id, producer_name, producer_email, cultivation_type, proposal_description, estimated_capacity, offered_monthly_rent, status, created_at) VALUES (2, 'Juliana Mendes', 'juliana.mendes@email.com', 'MIXED', 'Produção diversificada de hortaliças, ervas e pequenas frutas para comercialização local.', 700, 2500.00, 'CREATED', CURRENT_TIMESTAMP);
+
+INSERT INTO tb_cultivation_projects (space_id, producer_name, producer_email, cultivation_type, proposal_description, estimated_capacity, offered_monthly_rent, status, created_at) VALUES (3, 'Rafael Costa', 'rafael.costa@email.com', 'HERBS', 'Cultivo de ervas aromáticas e temperos com manejo sustentável e produção destinada aos moradores.', 220, 1400.00, 'ANALYZING', CURRENT_TIMESTAMP);

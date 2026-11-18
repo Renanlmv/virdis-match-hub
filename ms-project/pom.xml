@@ -11,8 +11,8 @@
 	<groupId>com.github.virdis</groupId>
 	<artifactId>ms-project</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>ms-project</name>
+	<description>Microsserviço de gerenciamento de propostas de cultivo do Virdis Expande</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -132,6 +132,14 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
