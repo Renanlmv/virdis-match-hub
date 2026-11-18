@@ -96,6 +96,8 @@ public class CultivationProjectService {
         CultivationProject project =
                 findEntityById(id);
 
+        validateProjectCanBeUpdated(project);
+
         if (!project.getSpaceId().equals(request.spaceId())) {
 
             SpaceResponseDTO space =
@@ -125,14 +127,13 @@ public class CultivationProjectService {
             Long id
     ) {
 
-        if (!projectRepository.existsById(id)) {
-            throw new ResourceNotFoundException(
-                    "Proposta não encontrada. ID: " + id
-            );
-        }
+        CultivationProject project =
+                findEntityById(id);
+
+        validateProjectCanBeDeleted(project);
 
         try {
-            projectRepository.deleteById(id);
+            projectRepository.delete(project);
         } catch (DataIntegrityViolationException e) {
             throw new DatabaseException(
                     "Não foi possível excluir a proposta. "
@@ -195,6 +196,35 @@ public class CultivationProjectService {
                             + space.id()
                             + " não está disponível para "
                             + "receber propostas."
+            );
+        }
+    }
+
+    private void validateProjectCanBeUpdated(
+            CultivationProject project
+    ) {
+
+        if (project.getStatus() != ProjectStatus.CREATED) {
+            throw new InvalidStatusTransitionException(
+                    "Somente propostas com status CREATED "
+                            + "podem ser atualizadas."
+            );
+        }
+    }
+
+    private void validateProjectCanBeDeleted(
+            CultivationProject project
+    ) {
+
+        if (
+                project.getStatus() == ProjectStatus.ANALYZING
+                        || project.getStatus() == ProjectStatus.APPROVED
+        ) {
+            throw new InvalidStatusTransitionException(
+                    "Não é possível excluir uma proposta "
+                            + "com status "
+                            + project.getStatus()
+                            + "."
             );
         }
     }

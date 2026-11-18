@@ -4,8 +4,8 @@ import com.github.virdis.ms.project.dto.SpaceResponseDTO;
 import com.github.virdis.ms.project.dto.SpaceStatusRequestDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "ms-space")
@@ -16,7 +16,7 @@ public interface SpaceClient {
             @PathVariable("id") Long id
     );
 
-    @PatchMapping("/api/v1/spaces/{id}/status")
+    @PutMapping("/api/v1/spaces/{id}/status")
     SpaceResponseDTO updateSpaceStatus(
             @PathVariable("id") Long id,
             @RequestBody SpaceStatusRequestDTO request
