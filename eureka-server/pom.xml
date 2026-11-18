@@ -11,8 +11,8 @@
 	<groupId>com.github.virdis</groupId>
 	<artifactId>eureka-server</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>eureka-server</name>
+	<description>Servidor de descoberta de serviços do Virdis Expande</description>
 	<url/>
 	<licenses>
 		<license/>
