@@ -181,15 +181,15 @@ public class SpaceController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{id}/status")
+    @PutMapping("/{id}/status")
     @Operation(
             summary = "Alterar status do espaço",
             description = """
-                    Altera o status do espaço conforme as regras
-                    de negócio. O endpoint será utilizado pelo
-                    microsserviço de propostas por comunicação
-                    síncrona com OpenFeign.
-                    """
+                Altera o status do espaço conforme as regras
+                de negócio. O endpoint será utilizado pelo
+                microsserviço de propostas por comunicação
+                síncrona com OpenFeign.
+                """
     )
     @ApiResponses({
             @ApiResponse(
