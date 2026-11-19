@@ -134,16 +134,64 @@ public class SpaceService {
             );
         }
 
-        if (
-                newStatus == SpaceStatus.MATCHED
-                        && currentStatus
-                        != SpaceStatus.AVAILABLE
-        ) {
-            throw new InvalidStatusTransitionException(
-                    "Somente espaços disponíveis podem "
-                            + "ser vinculados a um projeto."
-            );
+        switch (currentStatus) {
+
+            case AVAILABLE -> {
+
+                if (
+                        newStatus != SpaceStatus.UNDER_EVALUATION
+                                && newStatus != SpaceStatus.UNAVAILABLE
+                ) {
+                    throwInvalidStatusTransition(
+                            currentStatus,
+                            newStatus
+                    );
+                }
+            }
+
+            case UNDER_EVALUATION -> {
+
+                if (
+                        newStatus != SpaceStatus.MATCHED
+                                && newStatus != SpaceStatus.AVAILABLE
+                ) {
+                    throwInvalidStatusTransition(
+                            currentStatus,
+                            newStatus
+                    );
+                }
+            }
+
+            case UNAVAILABLE -> {
+
+                if (newStatus != SpaceStatus.AVAILABLE) {
+                    throwInvalidStatusTransition(
+                            currentStatus,
+                            newStatus
+                    );
+                }
+            }
+
+            case MATCHED ->
+                    throwInvalidStatusTransition(
+                            currentStatus,
+                            newStatus
+                    );
         }
+    }
+
+    private void throwInvalidStatusTransition(
+            SpaceStatus currentStatus,
+            SpaceStatus newStatus
+    ) {
+
+        throw new InvalidStatusTransitionException(
+                "Não é possível alterar o status do espaço de "
+                        + currentStatus
+                        + " para "
+                        + newStatus
+                        + "."
+        );
     }
 
     private void copyDtoToEntity(
@@ -151,11 +199,29 @@ public class SpaceService {
             Space space
     ) {
 
-        space.setOwnerName(request.ownerName());
+        space.setOwnerId(request.ownerId());
         space.setTitle(request.title());
+        space.setNeighborhood(
+                request.neighborhood()
+        );
         space.setType(request.type());
         space.setAreaSquareMeters(
                 request.areaSquareMeters()
+        );
+        space.setMonthlyRent(
+                request.monthlyRent()
+        );
+        space.setDescription(
+                request.description()
+        );
+        space.setImageUrl(
+                request.imageUrl()
+        );
+        space.setContactName(
+                request.contactName()
+        );
+        space.setContactEmail(
+                request.contactEmail()
         );
         space.setResidenceCount(
                 request.residenceCount()

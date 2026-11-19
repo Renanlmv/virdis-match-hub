@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
 
-        HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+        HttpStatus status = HttpStatus.UNPROCESSABLE_CONTENT;
 
         ValidationErrorDTO err = new ValidationErrorDTO(
                 Instant.now(),

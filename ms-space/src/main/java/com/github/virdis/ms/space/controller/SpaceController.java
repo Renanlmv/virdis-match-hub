@@ -32,7 +32,8 @@ import java.util.List;
         name = "Espaços",
         description = """
                 Operações de cadastro, consulta, atualização,
-                exclusão e alteração de status dos espaços.
+                exclusão e alteração de status dos anúncios
+                de espaços urbanos.
                 """
 )
 public class SpaceController {
@@ -41,8 +42,11 @@ public class SpaceController {
 
     @GetMapping
     @Operation(
-            summary = "Listar espaços",
-            description = "Retorna todos os espaços cadastrados."
+            summary = "Listar anúncios de espaços",
+            description = """
+                    Retorna todos os espaços urbanos cadastrados
+                    para possível implantação de hortas.
+                    """
     )
     @ApiResponse(
             responseCode = "200",
@@ -59,9 +63,9 @@ public class SpaceController {
 
     @GetMapping("/{id}")
     @Operation(
-            summary = "Buscar espaço por ID",
+            summary = "Buscar anúncio de espaço por ID",
             description = """
-                    Retorna os dados do espaço correspondente
+                    Retorna os dados do anúncio correspondente
                     ao identificador informado.
                     """
     )
@@ -92,10 +96,11 @@ public class SpaceController {
 
     @PostMapping
     @Operation(
-            summary = "Cadastrar espaço",
+            summary = "Cadastrar anúncio de espaço",
             description = """
-                    Cadastra um novo espaço com status inicial
-                    AVAILABLE.
+                    Cadastra um novo anúncio de espaço urbano.
+                    O status inicial será definido como AVAILABLE
+                    pela camada Service.
                     """
     )
     @ApiResponses({
@@ -135,10 +140,10 @@ public class SpaceController {
 
     @PutMapping("/{id}")
     @Operation(
-            summary = "Atualizar espaço",
+            summary = "Atualizar anúncio de espaço",
             description = """
-                    Atualiza os dados cadastrais do espaço sem
-                    alterar o status ou a data de criação.
+                    Atualiza os dados do anúncio sem alterar
+                    o status ou a data de criação.
                     """
     )
     @ApiResponses({
@@ -176,15 +181,15 @@ public class SpaceController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{id}/status")
+    @PutMapping("/{id}/status")
     @Operation(
             summary = "Alterar status do espaço",
             description = """
-                    Altera o status do espaço conforme as regras
-                    de negócio. Esse endpoint será utilizado pelo
-                    microsserviço de projetos por comunicação
-                    síncrona.
-                    """
+                Altera o status do espaço conforme as regras
+                de negócio. O endpoint será utilizado pelo
+                microsserviço de propostas por comunicação
+                síncrona com OpenFeign.
+                """
     )
     @ApiResponses({
             @ApiResponse(
@@ -227,9 +232,9 @@ public class SpaceController {
 
     @DeleteMapping("/{id}")
     @Operation(
-            summary = "Excluir espaço",
+            summary = "Excluir anúncio de espaço",
             description = """
-                    Exclui o espaço correspondente ao
+                    Exclui o anúncio correspondente ao
                     identificador informado.
                     """
     )

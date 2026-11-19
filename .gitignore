@@ -1,0 +1,53 @@
+# Maven
+**/target/
+
+# IntelliJ IDEA
+.idea/
+**/.idea/
+*.iml
+*.iws
+*.ipr
+
+# Visual Studio Code
+.vscode/
+**/.vscode/
+
+# Eclipse / Spring Tool Suite
+.metadata/
+.classpath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Variaveis de ambiente e segredos
+.env
+.env.*
+!.env.example
+
+# Arquivos temporarios
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Dumps e bancos locais
+*.sql.gz
+*.dump
+*.mv.db
+*.trace.db
+
+# Relatorios de cobertura
+coverage/
+**/jacoco.exec
+**/site/jacoco/

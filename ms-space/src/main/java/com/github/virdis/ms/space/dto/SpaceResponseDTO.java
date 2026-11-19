@@ -20,16 +20,22 @@ public record SpaceResponseDTO(
         Long id,
 
         @Schema(
-                description = "Nome do responsável pelo espaço",
-                example = "Condomínio Cidade Verde"
+                description = "Identificador do usuário proprietário do anúncio",
+                example = "user-001"
         )
-        String ownerName,
+        String ownerId,
 
         @Schema(
-                description = "Título de identificação do espaço",
+                description = "Nome do anúncio do espaço",
                 example = "Cobertura disponível para horta urbana"
         )
         String title,
+
+        @Schema(
+                description = "Bairro onde o espaço está localizado",
+                example = "Vila Mariana"
+        )
+        String neighborhood,
 
         @Schema(
                 description = "Tipo do espaço disponibilizado",
@@ -44,7 +50,37 @@ public record SpaceResponseDTO(
         BigDecimal areaSquareMeters,
 
         @Schema(
-                description = "Quantidade de residências que poderão ser beneficiadas",
+                description = "Valor mensal pretendido pelo uso do espaço",
+                example = "1800.00"
+        )
+        BigDecimal monthlyRent,
+
+        @Schema(
+                description = "Descrição das características do espaço",
+                example = "Cobertura com acesso à água e boa incidência solar."
+        )
+        String description,
+
+        @Schema(
+                description = "URL pública da imagem do espaço",
+                example = "https://exemplo.com/imagens/cobertura.png"
+        )
+        String imageUrl,
+
+        @Schema(
+                description = "Nome da pessoa autorizada para contato",
+                example = "Marina Souza"
+        )
+        String contactName,
+
+        @Schema(
+                description = "E-mail autorizado para contato",
+                example = "marina.souza@email.com"
+        )
+        String contactEmail,
+
+        @Schema(
+                description = "Quantidade de residências ou apartamentos beneficiados",
                 example = "60"
         )
         Integer residenceCount,
@@ -68,25 +104,31 @@ public record SpaceResponseDTO(
         SpaceStatus status,
 
         @Schema(
-                description = "Data e hora de cadastro do espaço",
+                description = "Data e hora de criação do anúncio",
                 example = "2026-11-05T14:30:00"
         )
         LocalDateTime createdAt
 
 ) {
 
-    public SpaceResponseDTO(Space space) {
-        this(
-                space.getId(),
-                space.getOwnerName(),
-                space.getTitle(),
-                space.getType(),
-                space.getAreaSquareMeters(),
-                space.getResidenceCount(),
-                space.getCity(),
-                space.getState(),
-                space.getStatus(),
-                space.getCreatedAt()
-        );
-    }
+        public SpaceResponseDTO(Space space) {
+                this(
+                        space.getId(),
+                        space.getOwnerId(),
+                        space.getTitle(),
+                        space.getNeighborhood(),
+                        space.getType(),
+                        space.getAreaSquareMeters(),
+                        space.getMonthlyRent(),
+                        space.getDescription(),
+                        space.getImageUrl(),
+                        space.getContactName(),
+                        space.getContactEmail(),
+                        space.getResidenceCount(),
+                        space.getCity(),
+                        space.getState(),
+                        space.getStatus(),
+                        space.getCreatedAt()
+                );
+        }
 }
