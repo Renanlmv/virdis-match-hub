@@ -89,6 +89,9 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       EUREKA_INSTANCE_HOSTNAME: ms-space
 
+      SPRINGDOC_SWAGGER_UI_CONFIG_URL: /ms-space/v3/api-docs/swagger-config
+      SPRINGDOC_SWAGGER_UI_URL: /ms-space/v3/api-docs
+
     depends_on:
       mysqldb:
         condition: service_healthy
@@ -116,6 +119,9 @@ services:
 
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       EUREKA_INSTANCE_HOSTNAME: ms-project
+
+      SPRINGDOC_SWAGGER_UI_CONFIG_URL: /ms-project/v3/api-docs/swagger-config
+      SPRINGDOC_SWAGGER_UI_URL: /ms-project/v3/api-docs
 
     depends_on:
       mysqldb:
