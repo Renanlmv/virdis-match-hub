@@ -639,6 +639,208 @@ cd ms-project
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=test
 ```
 
+## Execução dos microsserviços em containers com profile test
+
+O arquivo `docker-compose.yaml` executa os microsserviços com o profile `dev`, utilizando MySQL, Flyway e bancos persistidos em volume nomeado.
+
+As mesmas imagens também podem ser executadas com o profile `test`, utilizando H2 em memória. Nesse modo, o MySQL não é utilizado pelos microsserviços.
+
+### Diferença entre os profiles
+
+#### Profile `dev`
+
+```text
+MySQL 8.4.6
+Flyway habilitado
+Hibernate em modo validate
+Dados persistidos no volume virdis_mysql_data
+```
+
+#### Profile `test`
+
+```text
+H2 em memória
+Flyway desabilitado
+Tabelas criadas pelo Hibernate
+Dados carregados pelo import.sql
+Dados descartados quando o container é removido
+```
+
+### 1. Construir as imagens e iniciar a infraestrutura
+
+Caso as imagens ainda não tenham sido construídas, execute na raiz do repositório:
+
+```bash
+docker compose up -d --build
+```
+
+Aguarde o Eureka Server, o API Gateway e os microsserviços aparecerem como ativos:
+
+```bash
+docker compose ps
+```
+
+Confirme também o registro dos serviços no Eureka:
+
+```text
+http://localhost:8761
+```
+
+### 2. Parar os microsserviços no profile dev
+
+Antes de criar os containers com profile `test`, pare os microsserviços executados pelo Compose:
+
+```bash
+docker compose stop ms-space ms-project
+```
+
+O MySQL pode continuar em execução, embora não seja utilizado pelos containers com profile `test`.
+
+### 3. Remover containers test anteriores
+
+Caso os containers de teste já tenham sido criados anteriormente, remova-os:
+
+```bash
+docker rm -f virdis-ms-space-test virdis-ms-project-test
+```
+
+Se eles ainda não existirem, o Docker apenas informará que não foram encontrados.
+
+### 4. Executar o ms-space com profile test
+
+Execute em uma única linha:
+
+```bash
+docker run -d --name virdis-ms-space-test --network virdis-net -e SPRING_PROFILES_ACTIVE=test -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/ -e EUREKA_INSTANCE_HOSTNAME=ms-space-test -e SPRINGDOC_SWAGGER_UI_CONFIG_URL=/ms-space/v3/api-docs/swagger-config -e SPRINGDOC_SWAGGER_UI_URL=/ms-space/v3/api-docs virdis-ms-space
+```
+
+### 5. Executar o ms-project com profile test
+
+Execute em uma única linha:
+
+```bash
+docker run -d --name virdis-ms-project-test --network virdis-net -e SPRING_PROFILES_ACTIVE=test -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/ -e EUREKA_INSTANCE_HOSTNAME=ms-project-test -e SPRINGDOC_SWAGGER_UI_CONFIG_URL=/ms-project/v3/api-docs/swagger-config -e SPRINGDOC_SWAGGER_UI_URL=/ms-project/v3/api-docs virdis-ms-project
+```
+
+Os dois containers usam H2 em memória e, portanto, não recebem as variáveis de conexão do MySQL.
+
+### 6. Conferir os containers test
+
+```bash
+docker ps
+```
+
+Também é possível acompanhar os logs individualmente:
+
+```bash
+docker logs -f virdis-ms-space-test
+```
+
+```bash
+docker logs -f virdis-ms-project-test
+```
+
+Para sair da exibição dos logs sem parar o container, pressione `Ctrl + C`.
+
+### 7. Aguardar o registro no Eureka
+
+Abra:
+
+```text
+http://localhost:8761
+```
+
+Aguarde `MS-SPACE` e `MS-PROJECT` aparecerem como `UP`.
+
+Após parar os containers `dev`, o Eureka pode manter os registros anteriores por alguns instantes. Aguarde a atualização do painel antes de testar as APIs pelo Gateway.
+
+### 8. Testar os endpoints pelo Gateway
+
+Listar espaços:
+
+```text
+GET http://localhost:8082/ms-space/api/v1/spaces
+```
+
+Listar propostas:
+
+```text
+GET http://localhost:8082/ms-project/api/v1/projects
+```
+
+Swagger do `ms-space`:
+
+```text
+http://localhost:8082/ms-space/swagger-ui/index.html
+```
+
+Swagger do `ms-project`:
+
+```text
+http://localhost:8082/ms-project/swagger-ui/index.html
+```
+
+### 9. Acessar o H2
+
+Os microsserviços utilizam portas aleatórias. Para identificar a porta de cada container, consulte os logs:
+
+```bash
+docker logs virdis-ms-space-test
+```
+
+```bash
+docker logs virdis-ms-project-test
+```
+
+Procure a mensagem que informa a porta atribuída ao servidor.
+
+O console H2 deve ser acessado diretamente pela porta do respectivo microsserviço:
+
+```text
+http://localhost:PORTA/h2-console
+```
+
+Utilize os seguintes dados:
+
+```text
+JDBC URL: jdbc:h2:mem:testdb
+User Name: sa
+Password: deixar em branco
+```
+
+> Como os containers `test` não publicam suas portas aleatórias no host, o acesso direto ao console H2 é mais simples quando o profile `test` é executado pelo IntelliJ ou pelo Maven Wrapper. Para os containers, utilize os endpoints e o Swagger por meio do API Gateway.
+
+### 10. Parar os containers test
+
+```bash
+docker stop virdis-ms-space-test virdis-ms-project-test
+```
+
+### 11. Remover os containers test
+
+```bash
+docker rm virdis-ms-space-test virdis-ms-project-test
+```
+
+Como o H2 funciona em memória, os dados são descartados quando os containers são removidos.
+
+### 12. Restaurar os microsserviços no profile dev
+
+```bash
+docker compose start ms-space ms-project
+```
+
+Aguarde os microsserviços voltarem a aparecer como `UP` no Eureka.
+
+Depois, confirme os endpoints:
+
+```text
+GET http://localhost:8082/ms-space/api/v1/spaces
+GET http://localhost:8082/ms-project/api/v1/projects
+```
+
+Os dados do profile `dev` permanecem armazenados no volume nomeado do MySQL.
+
 ## Comandos Docker úteis
 
 ### Ver estado
