@@ -207,15 +207,15 @@ Aguarde todas aparecerem como `UP` antes de testar as APIs.
 
 ### Infraestrutura
 
-- [Eureka Server](http://localhost:8761)
+- Eureka Server: `http://localhost:8761`
 - API Gateway: `http://localhost:8082`
 
 ### Swagger/OpenAPI pelo Gateway
 
-- [Swagger do ms-space](http://localhost:8082/ms-space/swagger-ui/index.html)
-- [OpenAPI JSON do ms-space](http://localhost:8082/ms-space/v3/api-docs)
-- [Swagger do ms-project](http://localhost:8082/ms-project/swagger-ui/index.html)
-- [OpenAPI JSON do ms-project](http://localhost:8082/ms-project/v3/api-docs)
+- Swagger do ms-space: `http://localhost:8082/ms-space/swagger-ui/index.html`
+- OpenAPI JSON do ms-space: `http://localhost:8082/ms-space/v3/api-docs`
+- Swagger do ms-project: `http://localhost:8082/ms-project/swagger-ui/index.html`
+- OpenAPI JSON do ms-project: `http://localhost:8082/ms-project/v3/api-docs`
 
 ## Endpoints
 
