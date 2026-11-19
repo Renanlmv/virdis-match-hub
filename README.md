@@ -109,7 +109,7 @@ virdis-match-hub/
 │   ├── Dockerfile
 │   ├── pom.xml
 │   └── src/
-├── compose.yaml
+├── docker-compose.yaml
 └── README.md
 ```
 
