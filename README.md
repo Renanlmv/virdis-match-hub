@@ -643,7 +643,15 @@ cd ms-project
 
 O arquivo `docker-compose.yaml` executa os microsserviços com o profile `dev`, utilizando MySQL, Flyway e bancos persistidos em volume nomeado.
 
-As mesmas imagens também podem ser executadas com o profile `test`, utilizando H2 em memória. Nesse modo, o MySQL não é utilizado pelos microsserviços.
+As mesmas imagens Docker também podem ser executadas com o profile `test`, utilizando H2 em memória.
+
+Nessa modalidade, os microsserviços preservam a configuração obrigatória de porta aleatória:
+
+```properties
+server.port=0
+```
+
+As APIs e o Swagger permanecem acessíveis pelo API Gateway, que localiza cada instância por meio do Eureka.
 
 ### Diferença entre os profiles
 
@@ -654,6 +662,7 @@ MySQL 8.4.6
 Flyway habilitado
 Hibernate em modo validate
 Dados persistidos no volume virdis_mysql_data
+Execução principal pelo Docker Compose
 ```
 
 #### Profile `test`
@@ -664,6 +673,7 @@ Flyway desabilitado
 Tabelas criadas pelo Hibernate
 Dados carregados pelo import.sql
 Dados descartados quando o container é removido
+Microsserviços executados em portas aleatórias
 ```
 
 ### 1. Construir as imagens e iniciar a infraestrutura
@@ -674,11 +684,13 @@ Caso as imagens ainda não tenham sido construídas, execute na raiz do reposit�
 docker compose up -d --build
 ```
 
-Aguarde o Eureka Server, o API Gateway e os microsserviços aparecerem como ativos:
+Confira os containers:
 
 ```bash
 docker compose ps
 ```
+
+Aguarde o MySQL aparecer como `healthy` e os demais containers aparecerem como `Up`.
 
 Confirme também o registro dos serviços no Eureka:
 
@@ -688,7 +700,7 @@ http://localhost:8761
 
 ### 2. Parar os microsserviços no profile dev
 
-Antes de criar os containers com profile `test`, pare os microsserviços executados pelo Compose:
+Antes de iniciar os containers com profile `test`, pare os microsserviços executados pelo Docker Compose:
 
 ```bash
 docker compose stop ms-space ms-project
@@ -698,33 +710,55 @@ O MySQL pode continuar em execução, embora não seja utilizado pelos container
 
 ### 3. Remover containers test anteriores
 
-Caso os containers de teste já tenham sido criados anteriormente, remova-os:
+Caso os containers de teste tenham sido criados anteriormente, remova-os:
 
 ```bash
 docker rm -f virdis-ms-space-test virdis-ms-project-test
 ```
 
-Se eles ainda não existirem, o Docker apenas informará que não foram encontrados.
+Se os containers não existirem, o Docker apenas informará que não foram encontrados.
 
-### 4. Executar o ms-space com profile test
+### 4. Reiniciar Eureka Server e API Gateway
+
+O Eureka e os clientes mantêm temporariamente os registros das instâncias anteriores.
+
+Para evitar que o API Gateway tente encaminhar requisições para containers `dev` que foram parados, reinicie o Eureka Server e o API Gateway:
+
+```bash
+docker compose restart eureka-server api-gateway
+```
+
+Aguarde o painel do Eureka ficar disponível novamente:
+
+```text
+http://localhost:8761
+```
+
+### 5. Executar o ms-space com profile test
 
 Execute em uma única linha:
 
 ```bash
-docker run -d --name virdis-ms-space-test --network virdis-net -e SPRING_PROFILES_ACTIVE=test -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/ -e EUREKA_INSTANCE_HOSTNAME=ms-space-test -e SPRINGDOC_SWAGGER_UI_CONFIG_URL=/ms-space/v3/api-docs/swagger-config -e SPRINGDOC_SWAGGER_UI_URL=/ms-space/v3/api-docs virdis-ms-space
+docker run -d --name virdis-ms-space-test --network virdis-net -e SPRING_PROFILES_ACTIVE=test -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/ -e EUREKA_INSTANCE_HOSTNAME=virdis-ms-space-test -e EUREKA_INSTANCE_INSTANCE_ID=ms-space-test -e SPRINGDOC_SWAGGER_UI_CONFIG_URL=/ms-space/v3/api-docs/swagger-config -e SPRINGDOC_SWAGGER_UI_URL=/ms-space/v3/api-docs virdis-ms-space
 ```
 
-### 5. Executar o ms-project com profile test
+O comando não define `SERVER_PORT` e não publica uma porta no host. Dessa forma, o `ms-space` continua utilizando a configuração:
+
+```properties
+server.port=0
+```
+
+### 6. Executar o ms-project com profile test
 
 Execute em uma única linha:
 
 ```bash
-docker run -d --name virdis-ms-project-test --network virdis-net -e SPRING_PROFILES_ACTIVE=test -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/ -e EUREKA_INSTANCE_HOSTNAME=ms-project-test -e SPRINGDOC_SWAGGER_UI_CONFIG_URL=/ms-project/v3/api-docs/swagger-config -e SPRINGDOC_SWAGGER_UI_URL=/ms-project/v3/api-docs virdis-ms-project
+docker run -d --name virdis-ms-project-test --network virdis-net -e SPRING_PROFILES_ACTIVE=test -e EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/ -e EUREKA_INSTANCE_HOSTNAME=virdis-ms-project-test -e EUREKA_INSTANCE_INSTANCE_ID=ms-project-test -e SPRINGDOC_SWAGGER_UI_CONFIG_URL=/ms-project/v3/api-docs/swagger-config -e SPRINGDOC_SWAGGER_UI_URL=/ms-project/v3/api-docs virdis-ms-project
 ```
 
-Os dois containers usam H2 em memória e, portanto, não recebem as variáveis de conexão do MySQL.
+Os dois microsserviços usam H2 em memória no profile `test` e, portanto, não recebem variáveis de conexão com o MySQL.
 
-### 6. Conferir os containers test
+### 7. Conferir os containers test
 
 ```bash
 docker ps
@@ -740,9 +774,17 @@ docker logs -f virdis-ms-space-test
 docker logs -f virdis-ms-project-test
 ```
 
+Nos logs, confirme:
+
+```text
+The following 1 profile is active: "test"
+```
+
+Também deve aparecer a porta aleatória escolhida para cada microsserviço.
+
 Para sair da exibição dos logs sem parar o container, pressione `Ctrl + C`.
 
-### 7. Aguardar o registro no Eureka
+### 8. Aguardar o registro no Eureka
 
 Abra:
 
@@ -750,11 +792,19 @@ Abra:
 http://localhost:8761
 ```
 
-Aguarde `MS-SPACE` e `MS-PROJECT` aparecerem como `UP`.
+Aguarde aparecerem:
 
-Após parar os containers `dev`, o Eureka pode manter os registros anteriores por alguns instantes. Aguarde a atualização do painel antes de testar as APIs pelo Gateway.
+```text
+API-GATEWAY
+MS-SPACE
+MS-PROJECT
+```
 
-### 8. Testar os endpoints pelo Gateway
+Todos devem estar com status `UP`.
+
+O Eureka registra o host e a porta aleatória de cada instância. O API Gateway utiliza essas informações para encaminhar as requisições sem depender de uma URL ou porta fixa para os microsserviços.
+
+### 9. Testar os endpoints pelo API Gateway
 
 Listar espaços:
 
@@ -768,10 +818,30 @@ Listar propostas:
 GET http://localhost:8082/ms-project/api/v1/projects
 ```
 
+Buscar um espaço:
+
+```text
+GET http://localhost:8082/ms-space/api/v1/spaces/1
+```
+
+Buscar uma proposta:
+
+```text
+GET http://localhost:8082/ms-project/api/v1/projects/1
+```
+
+### 10. Testar o Swagger pelo API Gateway
+
 Swagger do `ms-space`:
 
 ```text
 http://localhost:8082/ms-space/swagger-ui/index.html
+```
+
+OpenAPI JSON do `ms-space`:
+
+```text
+http://localhost:8082/ms-space/v3/api-docs
 ```
 
 Swagger do `ms-project`:
@@ -780,21 +850,25 @@ Swagger do `ms-project`:
 http://localhost:8082/ms-project/swagger-ui/index.html
 ```
 
-### 9. Acessar o H2
+OpenAPI JSON do `ms-project`:
 
-Os microsserviços utilizam portas aleatórias. Para identificar a porta de cada container, consulte os logs:
-
-```bash
-docker logs virdis-ms-space-test
+```text
+http://localhost:8082/ms-project/v3/api-docs
 ```
 
-```bash
-docker logs virdis-ms-project-test
+### 11. Console H2
+
+Nos containers com profile `test`, os microsserviços preservam a configuração obrigatória de porta aleatória:
+
+```properties
+server.port=0
 ```
 
-Procure a mensagem que informa a porta atribuída ao servidor.
+As APIs e o Swagger são acessados pelo API Gateway, que localiza cada instância por meio do Eureka.
 
-O console H2 deve ser acessado diretamente pela porta do respectivo microsserviço:
+Como a porta interna é escolhida dinamicamente e não é publicada no host, o Console H2 não é acessado diretamente nessa modalidade de execução em containers.
+
+Para consultar o Console H2, execute o profile `test` pelo IntelliJ IDEA ou pelo Maven Wrapper, identifique no log a porta aleatória atribuída e abra:
 
 ```text
 http://localhost:PORTA/h2-console
@@ -808,23 +882,31 @@ User Name: sa
 Password: deixar em branco
 ```
 
-> Como os containers `test` não publicam suas portas aleatórias no host, o acesso direto ao console H2 é mais simples quando o profile `test` é executado pelo IntelliJ ou pelo Maven Wrapper. Para os containers, utilize os endpoints e o Swagger por meio do API Gateway.
-
-### 10. Parar os containers test
+### 12. Parar os containers test
 
 ```bash
 docker stop virdis-ms-space-test virdis-ms-project-test
 ```
 
-### 11. Remover os containers test
+### 13. Remover os containers test
 
 ```bash
 docker rm virdis-ms-space-test virdis-ms-project-test
 ```
 
-Como o H2 funciona em memória, os dados são descartados quando os containers são removidos.
+Como o H2 funciona em memória, os dados são descartados quando os containers são encerrados e removidos.
 
-### 12. Restaurar os microsserviços no profile dev
+### 14. Reiniciar Eureka Server e API Gateway
+
+Antes de restaurar os microsserviços com profile `dev`, reinicie novamente o Eureka Server e o API Gateway:
+
+```bash
+docker compose restart eureka-server api-gateway
+```
+
+Aguarde o painel do Eureka voltar a responder.
+
+### 15. Restaurar os microsserviços no profile dev
 
 ```bash
 docker compose start ms-space ms-project
@@ -840,6 +922,19 @@ GET http://localhost:8082/ms-project/api/v1/projects
 ```
 
 Os dados do profile `dev` permanecem armazenados no volume nomeado do MySQL.
+
+### Resumo da execução por profile
+
+```text
+Profile dev:
+Docker Compose + MySQL + Flyway + volume nomeado
+
+Profile test em containers:
+docker run + H2 + portas aleatórias + acesso pelo API Gateway
+
+Profile test pelo IntelliJ ou Maven Wrapper:
+H2 + portas aleatórias + acesso pelo API Gateway e pelo Console H2
+```
 
 ## Comandos Docker úteis
 
